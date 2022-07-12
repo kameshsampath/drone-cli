@@ -301,6 +301,13 @@ func exec(c *cli.Context) error {
 	// with per-step color coding if a tty.
 	hooks := &runtime.Hook{}
 	hooks.BeforeEach = func(s *runtime.State) error {
+
+		if c.Bool("clone") == false {
+			pwd, _ := os.Getwd()
+			s.Step.Metadata.Labels["io.drone.desktop.pipeline.dir"] = pwd
+			s.Step.Metadata.Labels["io.drone.stage.name"] = pipeline.Name
+		}
+
 		s.Step.Envs["CI_BUILD_STATUS"] = "success"
 		s.Step.Envs["CI_BUILD_STARTED"] = strconv.FormatInt(s.Runtime.Time, 10)
 		s.Step.Envs["CI_BUILD_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
