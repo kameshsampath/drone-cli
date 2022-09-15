@@ -8,7 +8,9 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/drone/envsubst"
@@ -304,7 +306,17 @@ func exec(c *cli.Context) error {
 
 		if c.Bool("clone") == false {
 			pwd, _ := os.Getwd()
-			s.Step.Metadata.Labels["io.drone.desktop.pipeline.dir"] = pwd
+			s.Step.Metadata.Labels["io.drone.desktop.pipeline.file"] = path.Join(pwd, file)
+			//This is used to control the overall stage status when running
+			//with drone ci docker extension
+			includes := c.StringSlice("include")
+			if includes != nil {
+				s.Step.Metadata.Labels["io.drone.desktop.pipeline.includes"] = strings.Join(includes, ",")
+			}
+			excludes := c.StringSlice("exclude")
+			if includes != nil {
+				s.Step.Metadata.Labels["io.drone.desktop.pipeline.excludes"] = strings.Join(excludes, ",")
+			}
 			s.Step.Metadata.Labels["io.drone.stage.name"] = pipeline.Name
 		}
 
